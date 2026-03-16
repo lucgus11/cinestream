@@ -1,5 +1,7 @@
 "use client";
-
+import "video.js/dist/video-js.css";  // 👈 ici, import statique
+import { useEffect, useRef, useState } from "react";
+import type { VideoSource } from "@/lib/api";
 import { useEffect, useRef, useState } from "react";
 import type { VideoSource } from "@/lib/api";
 
@@ -37,7 +39,6 @@ export default function VideoPlayer({
 
     const initPlayer = async () => {
       const videojs = (await import("video.js")).default;
-      await import("video.js/dist/video-js.css");
 
       if (!videoRef.current || !isMounted) return;
 
