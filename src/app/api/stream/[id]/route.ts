@@ -11,9 +11,10 @@ const STREAM_API = process.env.STREAM_API_BASE || ""; // Variable SERVEUR (sans 
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const movieId = Number(params.id);
+  const { id } = await context.params;
+  const movieId = Number(id);
 
   if (isNaN(movieId)) {
     return NextResponse.json({ error: "ID invalide" }, { status: 400 });
