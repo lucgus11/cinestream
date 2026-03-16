@@ -11,7 +11,8 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const movie = await getMovieDetails(Number(params.id));
+    const { id } = await params;
+    const movie = await getMovieDetails(Number(id));
     return {
       title: movie.title,
       description: movie.overview,
