@@ -1,7 +1,5 @@
 "use client";
-import "video.js/dist/video-js.css";  // 👈 ici, import statique
-import { useEffect, useRef, useState } from "react";
-import type { VideoSource } from "@/lib/api";
+import "video.js/dist/video-js.css";
 import { useEffect, useRef, useState } from "react";
 import type { VideoSource } from "@/lib/api";
 
