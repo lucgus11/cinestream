@@ -13,7 +13,7 @@ export async function generateMetadata({
   const { id } = await params;
   const movie = await getArchiveMovieDetails(id).catch(() => null);
   return {
-    title: movie ? `${movie.title} – Gratuit` : "Film introuvable",
+    title: movie ? movie.title + " – Gratuit" : "Film introuvable",
     description: movie?.description || "",
   };
 }
@@ -27,9 +27,7 @@ export default async function ArchiveMoviePage({
   const movie = await getArchiveMovieDetails(id).catch(() => null);
   if (!movie) notFound();
 
-  const archiveUrl = `https://archive.org/details/${movie.id}`;
-  const btnClass = "inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cinema-accent-hover transition-colors";
-  const linkClass = "inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-xs transition-colors";
+  const archiveUrl = "https://archive.org/details/" + movie.id;
 
   return (
     <div className="min-h-screen bg-cinema-bg pt-16">
@@ -45,38 +43,51 @@ export default async function ArchiveMoviePage({
 
         <div className="grid lg:grid-cols-3 gap-8">
 
-          {/* Player */}
           <div className="lg:col-span-2 space-y-4">
-            {movie.sources.length > 0 ? (
+
+            {movie.sources.length > 0 && (
               <VideoPlayer
                 sources={movie.sources}
                 poster={movie.poster_url ?? undefined}
                 title={movie.title}
                 className="shadow-2xl shadow-black/60"
               />
-            ) : (
+            )}
+
+            {movie.sources.length === 0 && (
               <div className="aspect-video bg-cinema-surface rounded-lg flex items-center justify-center">
-                <div className="text-center">
+                <div className="text-center px-6">
                   <Archive className="w-12 h-12 text-cinema-muted mx-auto mb-3" />
-                  <p className="text-cinema-muted text-sm mb-3">
+                  <p className="text-cinema-muted text-sm mb-4">
                     Flux vidéo non disponible directement
                   </p>
-                  <a href={archiveUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>
+                  
+                    href={archiveUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cinema-accent-hover transition-colors"
+                  >
                     <ExternalLink className="w-4 h-4" />
-                    Voir sur Archive.org
+                    <span>Voir sur Archive.org</span>
                   </a>
                 </div>
               </div>
             )}
 
-            <a href={archiveUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
+            
+              href={archiveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-xs transition-colors"
+            >
               <ExternalLink className="w-3 h-3" />
-              Voir la fiche complète sur Archive.org
+              <span>Voir la fiche complète sur Archive.org</span>
             </a>
+
           </div>
 
-          {/* Infos */}
           <div className="space-y-5">
+
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Archive className="w-4 h-4 text-green-500" />
@@ -164,6 +175,7 @@ export default async function ArchiveMoviePage({
                 </div>
               </div>
             )}
+
           </div>
         </div>
       </div>
