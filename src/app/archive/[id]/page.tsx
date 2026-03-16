@@ -27,11 +27,14 @@ export default async function ArchiveMoviePage({
   const movie = await getArchiveMovieDetails(id).catch(() => null);
   if (!movie) notFound();
 
+  const archiveUrl = `https://archive.org/details/${movie.id}`;
+  const btnClass = "inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cinema-accent-hover transition-colors";
+  const linkClass = "inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-xs transition-colors";
+
   return (
     <div className="min-h-screen bg-cinema-bg pt-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* Retour */}
         <Link
           href="/archive"
           className="inline-flex items-center gap-2 text-cinema-muted hover:text-white mb-6 group transition-colors"
@@ -58,12 +61,7 @@ export default async function ArchiveMoviePage({
                   <p className="text-cinema-muted text-sm mb-3">
                     Flux vidéo non disponible directement
                   </p>
-                  
-                    href={`https://archive.org/details/${movie.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cinema-accent-hover transition-colors"
-                  >
+                  <a href={archiveUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>
                     <ExternalLink className="w-4 h-4" />
                     Voir sur Archive.org
                   </a>
@@ -71,12 +69,7 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            
-              href={`https://archive.org/details/${movie.id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-green-400 hover:text-green-300 text-xs transition-colors"
-            >
+            <a href={archiveUrl} target="_blank" rel="noopener noreferrer" className={linkClass}>
               <ExternalLink className="w-3 h-3" />
               Voir la fiche complète sur Archive.org
             </a>
@@ -99,7 +92,6 @@ export default async function ArchiveMoviePage({
               </h1>
             </div>
 
-            {/* Meta */}
             <div className="grid grid-cols-2 gap-3">
               {movie.year && (
                 <div className="bg-cinema-surface border border-cinema-border rounded-lg p-3 text-center">
@@ -117,7 +109,6 @@ export default async function ArchiveMoviePage({
               )}
             </div>
 
-            {/* Réalisateur */}
             {movie.creator && (
               <div>
                 <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-1 font-semibold">
@@ -127,7 +118,6 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            {/* Synopsis */}
             {movie.description && (
               <div>
                 <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
@@ -139,7 +129,6 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            {/* Sujets */}
             {movie.subject.length > 0 && (
               <div>
                 <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
@@ -158,7 +147,6 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            {/* Sources */}
             {movie.sources.length > 0 && (
               <div>
                 <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
