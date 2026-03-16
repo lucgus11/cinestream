@@ -65,7 +65,7 @@ export default async function ArchiveMoviePage({
                     href={archiveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-cinema-accent-hover transition-colors"
+                    className={btnClass}
                   >
                     <ExternalLink className="w-4 h-4" />
                     <span>Voir sur Archive.org</span>
