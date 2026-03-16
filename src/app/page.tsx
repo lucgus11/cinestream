@@ -24,9 +24,12 @@ function GridSkeleton({ title }: { title: string }) {
   );
 }
 
-export default async function HomePage({ searchParams }: PageProps) {
-  const query = searchParams.q;
-  const category = searchParams.category;
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; category?: string }>;
+}) {
+  const { q: query, category } = await searchParams;
 
   // Fetch des données en parallèle
   const [trending, popular, topRated] = await Promise.all([
