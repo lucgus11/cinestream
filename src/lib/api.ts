@@ -34,7 +34,6 @@ export interface ApiResponse<T> {
   total_results: number;
 }
 
-// ─── Images (TMDB images CDN est public, pas de clé requise) ─
 const TMDB_IMAGE = "https://image.tmdb.org/t/p";
 
 export const getPosterUrl = (path: string | null, size = "w500") =>
@@ -43,15 +42,13 @@ export const getPosterUrl = (path: string | null, size = "w500") =>
 export const getBackdropUrl = (path: string | null, size = "w1280") =>
   path ? `${TMDB_IMAGE}/${size}${path}` : "/placeholder-backdrop.jpg";
 
-// ─── Proxy fetch (toujours côté serveur) ──────────────────
+// ─── Proxy fetch ──────────────────────────────────────────
 async function traktFetch<T>(
   endpoint: string,
   params: Record<string, string> = {}
 ): Promise<{ data: T; headers: Headers }> {
-  const url = new URL(
-    `/api/trakt/${endpoint}`,
-    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-  );
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const url = new URL(`/api/trakt/${endpoint}`, baseUrl);
   Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
 
   const res = await fetch(url.toString(), { next: { revalidate: 3600 } });
@@ -60,7 +57,7 @@ async function traktFetch<T>(
   return { data, headers: res.headers };
 }
 
-// ─── Mock data (sans clé API) ─────────────────────────────
+// ─── Mock data ────────────────────────────────────────────
 const MOCK_MOVIES: Movie[] = Array.from({ length: 20 }, (_, i) => ({
   id: i + 1,
   tmdb_id: [157336, 27205, 155, 438631, 19995, 603, 496243, 872585, 346698, 569094,
@@ -84,8 +81,8 @@ const MOCK_MOVIES: Movie[] = Array.from({ length: 20 }, (_, i) => ({
   popularity: 100 + i * 10,
 }));
 
-// ─── Convertisseur Trakt → Movie ──────────────────────────
-function traktToMovie(item: {
+// ─── Convertisseur ────────────────────────────────────────
+type TraktMovieRaw = {
   title: string;
   year: number;
   overview?: string;
@@ -95,7 +92,9 @@ function traktToMovie(item: {
   genres?: string[];
   language?: string;
   ids: { trakt: number; tmdb: number; imdb: string };
-}): Movie {
+};
+
+function traktToMovie(item: TraktMovieRaw): Movie {
   return {
     id: item.ids.trakt,
     tmdb_id: item.ids.tmdb,
@@ -114,15 +113,19 @@ function traktToMovie(item: {
   };
 }
 
-// ─── API Publique ─────────────────────────────────────────
+// ─── API ──────────────────────────────────────────────────
 
-/** Films populaires */
+type PopularItem = { title: string; year: number; ids: { trakt: number; tmdb: number; imdb: string } };
+type TrendingItem = { watchers: number; movie: TraktMovieRaw };
+type WatchedItem = { watcher_count: number; movie: TraktMovieRaw };
+type SearchItem = { score: number; movie: TraktMovieRaw };
+
 export async function getPopularMovies(page = 1): Promise<ApiResponse<Movie>> {
   try {
-    const { data, headers } = await traktFetch
-      Array<{ title: string; year: number; ids: { trakt: number; tmdb: number; imdb: string } }>
-    >("movies/popular", { page: String(page), limit: "20" });
-
+    const { data, headers } = await traktFetch<PopularItem[]>(
+      "movies/popular",
+      { page: String(page), limit: "20" }
+    );
     const totalPages = Number(headers.get("X-Pagination-Page-Count") || 10);
     return {
       results: data.map(traktToMovie),
@@ -135,35 +138,27 @@ export async function getPopularMovies(page = 1): Promise<ApiResponse<Movie>> {
   }
 }
 
-/** Films tendance */
 export async function getTrendingMovies(): Promise<Movie[]> {
   try {
-    const { data } = await traktFetch
-      Array<{ watchers: number; movie: { title: string; year: number; ids: { trakt: number; tmdb: number; imdb: string } } }>
-    >("movies/trending", { limit: "10" });
-
-    return data.map((item) => ({
-      ...traktToMovie(item.movie),
-      popularity: item.watchers,
-    }));
+    const { data } = await traktFetch<TrendingItem[]>(
+      "movies/trending",
+      { limit: "10" }
+    );
+    return data.map((item) => ({ ...traktToMovie(item.movie), popularity: item.watchers }));
   } catch {
     return MOCK_MOVIES.slice(0, 10);
   }
 }
 
-/** Films les plus regardés */
 export async function getTopRatedMovies(page = 1): Promise<ApiResponse<Movie>> {
   try {
-    const { data, headers } = await traktFetch
-      Array<{ watcher_count: number; movie: { title: string; year: number; ids: { trakt: number; tmdb: number; imdb: string } } }>
-    >("movies/watched/all", { page: String(page), limit: "20" });
-
+    const { data, headers } = await traktFetch<WatchedItem[]>(
+      "movies/watched/all",
+      { page: String(page), limit: "20" }
+    );
     const totalPages = Number(headers.get("X-Pagination-Page-Count") || 10);
     return {
-      results: data.map((item) => ({
-        ...traktToMovie(item.movie),
-        popularity: item.watcher_count,
-      })),
+      results: data.map((item) => ({ ...traktToMovie(item.movie), popularity: item.watcher_count })),
       page,
       total_pages: totalPages,
       total_results: totalPages * 20,
@@ -173,13 +168,12 @@ export async function getTopRatedMovies(page = 1): Promise<ApiResponse<Movie>> {
   }
 }
 
-/** Recherche */
 export async function searchMovies(query: string, page = 1): Promise<ApiResponse<Movie>> {
   try {
-    const { data, headers } = await traktFetch
-      Array<{ score: number; movie: { title: string; year: number; ids: { trakt: number; tmdb: number; imdb: string } } }>
-    >("search/movie", { query, page: String(page), limit: "20" });
-
+    const { data, headers } = await traktFetch<SearchItem[]>(
+      "search/movie",
+      { query, page: String(page), limit: "20" }
+    );
     const totalPages = Number(headers.get("X-Pagination-Page-Count") || 1);
     return {
       results: data.map((item) => traktToMovie(item.movie)),
@@ -195,28 +189,18 @@ export async function searchMovies(query: string, page = 1): Promise<ApiResponse
   }
 }
 
-/** Détails d'un film */
 export async function getMovieDetails(id: number): Promise<Movie> {
   try {
-    const { data } = await traktFetch<{
-      title: string;
-      year: number;
-      overview: string;
-      runtime: number;
-      rating: number;
-      votes: number;
-      genres: string[];
-      language: string;
-      ids: { trakt: number; tmdb: number; imdb: string };
-    }>(`movies/${id}`, { extended: "full" });
-
+    const { data } = await traktFetch<TraktMovieRaw>(
+      `movies/${id}`,
+      { extended: "full" }
+    );
     return traktToMovie(data);
   } catch {
     return MOCK_MOVIES.find((m) => m.id === id) || MOCK_MOVIES[0];
   }
 }
 
-// ─── Streaming ────────────────────────────────────────────
 export async function getVideoSources(movieId: number): Promise<VideoSource[]> {
   const STREAM_API = process.env.NEXT_PUBLIC_STREAM_API_BASE || "";
   if (STREAM_API) {
@@ -237,7 +221,6 @@ export async function getVideoSources(movieId: number): Promise<VideoSource[]> {
   ];
 }
 
-/** URL embed — utilise imdb_id pour meilleure compatibilité */
 export function getEmbedUrl(
   movieId: number,
   provider: "vidsrc" | "multiembed" = "vidsrc",
