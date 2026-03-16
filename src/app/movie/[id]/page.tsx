@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Star, Clock, Calendar, Play, ArrowLeft, TrendingUp } from "lucide-react";
 import { getMovieDetails, getPosterUrl, getBackdropUrl } from "@/lib/api";
 
-interface PageProps {
-  params: { id: string };
+type PageProps = {
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
