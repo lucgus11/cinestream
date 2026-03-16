@@ -42,7 +42,7 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
-          
+
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             <div className="w-8 h-8 bg-cinema-accent rounded flex items-center justify-center group-hover:bg-cinema-accent-hover transition-colors">
@@ -62,6 +62,7 @@ export default function Navbar() {
               { href: "/", label: "Accueil" },
               { href: "/?category=trending", label: "Tendances" },
               { href: "/?category=top_rated", label: "Les mieux notés" },
+              { href: "/archive", label: "🎞️ Films Gratuits" },
             ].map((item) => (
               <Link
                 key={item.href}
@@ -75,7 +76,7 @@ export default function Navbar() {
 
           {/* Actions droite */}
           <div className="flex items-center gap-2">
-            
+
             {/* Barre de recherche */}
             {searchOpen ? (
               <form onSubmit={handleSearch} className="flex items-center">
@@ -128,6 +129,7 @@ export default function Navbar() {
               { href: "/", label: "🏠 Accueil" },
               { href: "/?category=trending", label: "🔥 Tendances" },
               { href: "/?category=top_rated", label: "⭐ Les mieux notés" },
+              { href: "/archive", label: "🎞️ Films Gratuits" },
             ].map((item) => (
               <Link
                 key={item.href}
