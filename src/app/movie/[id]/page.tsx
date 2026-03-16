@@ -23,7 +23,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function MoviePage({ params }: PageProps) {
-  const movieId = Number(params.id);
+  const { id } = await params;
+  const movieId = Number(id);
   if (isNaN(movieId)) notFound();
 
   const movie = await getMovieDetails(movieId).catch(() => null);
