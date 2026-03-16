@@ -5,8 +5,8 @@ import { ArrowLeft, Star, Clock, Calendar } from "lucide-react";
 import { getMovieDetails, getVideoSources, getPosterUrl } from "@/lib/api";
 import VideoPlayer from "@/components/VideoPlayer";
 
-interface PageProps {
-  params: { id: string };
+type PageProps = {
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
