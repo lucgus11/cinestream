@@ -271,7 +271,15 @@ pwa-asset-generator ./public/logo.png ./public/icons \
 
 ## 📄 Licence
 
-MIT — Libre d'utilisation, modification et distribution.
+Ce projet est sous licence **CC BY-NC 4.0 (Creative Commons Attribution - Pas d'Utilisation Commerciale 4.0 International)**.
+
+### Ce que cela signifie :
+- **Partage** : Vous pouvez copier et distribuer le matériel sous n'importe quel format.
+- **Adaptation** : Vous pouvez modifier et transformer le projet.
+- **Attribution** : Vous devez créditer l'auteur original (moi-même), fournir un lien vers la licence et indiquer si des modifications ont été effectuées.
+- **Pas d'Utilisation Commerciale** : Vous n'avez pas le droit d'utiliser ce projet, ou des parties de celui-ci, à des fins commerciales.
+
+Consultez le résumé de la licence ici : [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/deed.fr)
 
 ---
 
