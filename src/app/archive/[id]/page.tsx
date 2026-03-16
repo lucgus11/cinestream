@@ -32,7 +32,10 @@ export default async function ArchiveMoviePage({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
         {/* Retour */}
-        <Link href="/archive" className="inline-flex items-center gap-2 text-cinema-muted hover:text-white mb-6 group transition-colors">
+        <Link
+          href="/archive"
+          className="inline-flex items-center gap-2 text-cinema-muted hover:text-white mb-6 group transition-colors"
+        >
           <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
           <span className="text-sm">Films gratuits</span>
         </Link>
@@ -44,7 +47,7 @@ export default async function ArchiveMoviePage({
             {movie.sources.length > 0 ? (
               <VideoPlayer
                 sources={movie.sources}
-                poster={movie.poster_url || undefined}
+                poster={movie.poster_url ?? undefined}
                 title={movie.title}
                 className="shadow-2xl shadow-black/60"
               />
@@ -52,7 +55,9 @@ export default async function ArchiveMoviePage({
               <div className="aspect-video bg-cinema-surface rounded-lg flex items-center justify-center">
                 <div className="text-center">
                   <Archive className="w-12 h-12 text-cinema-muted mx-auto mb-3" />
-                  <p className="text-cinema-muted text-sm mb-3">Flux vidéo non disponible directement</p>
+                  <p className="text-cinema-muted text-sm mb-3">
+                    Flux vidéo non disponible directement
+                  </p>
                   
                     href={`https://archive.org/details/${movie.id}`}
                     target="_blank"
@@ -66,7 +71,6 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            {/* Lien Archive.org */}
             
               href={`https://archive.org/details/${movie.id}`}
               target="_blank"
@@ -87,7 +91,10 @@ export default async function ArchiveMoviePage({
                   Domaine Public Gratuit
                 </span>
               </div>
-              <h1 className="text-2xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, serif" }}>
+              <h1
+                className="text-2xl font-bold text-white leading-tight"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
                 {movie.title}
               </h1>
             </div>
@@ -113,7 +120,9 @@ export default async function ArchiveMoviePage({
             {/* Réalisateur */}
             {movie.creator && (
               <div>
-                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-1 font-semibold">Réalisateur</h3>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-1 font-semibold">
+                  Réalisateur
+                </h3>
                 <p className="text-white text-sm">{movie.creator}</p>
               </div>
             )}
@@ -121,7 +130,9 @@ export default async function ArchiveMoviePage({
             {/* Synopsis */}
             {movie.description && (
               <div>
-                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">Synopsis</h3>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
+                  Synopsis
+                </h3>
                 <p className="text-cinema-muted text-sm leading-relaxed line-clamp-6">
                   {movie.description.replace(/<[^>]+>/g, "")}
                 </p>
@@ -131,10 +142,15 @@ export default async function ArchiveMoviePage({
             {/* Sujets */}
             {movie.subject.length > 0 && (
               <div>
-                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">Genres</h3>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
+                  Genres
+                </h3>
                 <div className="flex flex-wrap gap-2">
                   {movie.subject.slice(0, 6).map((s) => (
-                    <span key={s} className="px-2.5 py-1 bg-cinema-surface border border-cinema-border text-cinema-text text-xs rounded-full">
+                    <span
+                      key={s}
+                      className="px-2.5 py-1 bg-cinema-surface border border-cinema-border text-cinema-text text-xs rounded-full"
+                    >
                       {s}
                     </span>
                   ))}
@@ -142,7 +158,7 @@ export default async function ArchiveMoviePage({
               </div>
             )}
 
-            {/* Sources disponibles */}
+            {/* Sources */}
             {movie.sources.length > 0 && (
               <div>
                 <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
@@ -150,7 +166,10 @@ export default async function ArchiveMoviePage({
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {movie.sources.map((s) => (
-                    <span key={s.src} className="px-2.5 py-1 bg-green-900/30 border border-green-700/40 text-green-400 text-xs rounded-full">
+                    <span
+                      key={s.src}
+                      className="px-2.5 py-1 bg-green-900/30 border border-green-700/40 text-green-400 text-xs rounded-full"
+                    >
                       {s.label}
                     </span>
                   ))}
