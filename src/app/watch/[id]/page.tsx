@@ -1,17 +1,16 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowLeft, Star, Clock, Calendar } from "lucide-react";
 import { getMovieDetails, getVideoSources, getPosterUrl } from "@/lib/api";
-import VideoPlayer from "@/components/VideoPlayer";
+import WatchClient from "./WatchClient";
 
-type PageProps = {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ id: string }>;
-}
-
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+}): Promise<Metadata> {
   try {
-    const movie = await getMovieDetails(Number(params.id));
+    const { id } = await params;
+    const movie = await getMovieDetails(Number(id));
     return {
       title: `${movie.title} – Regarder en streaming`,
       description: movie.overview,
@@ -28,11 +27,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-// Composant client séparé pour le player (car il utilise des hooks)
-import WatchClient from "./WatchClient";
-
-export default async function WatchPage({ params }: PageProps) {
-  const movieId = Number(params.id);
+export default async function WatchPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const movieId = Number(id);
   if (isNaN(movieId)) notFound();
 
   const [movie, sources] = await Promise.all([
