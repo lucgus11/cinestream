@@ -177,6 +177,7 @@ export default async function ArchiveMoviePage({
             )}
 
           </div>
+        
         </div>
       </div>
     </div>
