@@ -1,82 +1,193 @@
-import { getArchiveMovies, getArchiveRssFeed, SAFE_COLLECTIONS } from "@/lib/archive";
-import ArchiveMovieCard from "@/components/ArchiveMovieCard";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft, Clock, Calendar, Archive, ExternalLink } from "lucide-react";
+import { getArchiveMovieDetails } from "@/lib/archive";
+import VideoPlayer from "@/components/VideoPlayer";
 
-export const metadata: Metadata = {
-  title: "Films Gratuits – Domaine Public",
-  description: "Films du domaine public disponibles gratuitement via Archive.org",
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const movie = await getArchiveMovieDetails(id).catch(() => null);
+  return {
+    title: movie ? movie.title + " - Gratuit" : "Film introuvable",
+    description: movie?.description || "",
+  };
+}
 
-export default async function ArchivePage() {
-  const [featured, silent, noir] = await Promise.all([
-    getArchiveMovies("feature_films", 1, 12),
-    getArchiveMovies("silent_films", 1, 8),
-    getArchiveMovies("film_noir", 1, 8),
-  ]);
+function ArchiveLink({ href, className, children }: { href: string; className: string; children: React.ReactNode }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+      {children}
+    </a>
+  );
+}
+
+function NoVideoFallback({ archiveUrl }: { archiveUrl: string }) {
+  return (
+    <div className="aspect-video bg-cinema-surface rounded-lg flex items-center justify-center">
+      <div className="text-center px-6">
+        <Archive className="w-12 h-12 text-cinema-muted mx-auto mb-3" />
+        <p className="text-cinema-muted text-sm mb-4">
+          Flux video non disponible directement
+        </p>
+        <ArchiveLink
+          href={archiveUrl}
+          className="inline-flex items-center gap-2 bg-cinema-accent text-white px-4 py-2 rounded-lg text-sm font-medium"
+        >
+          <ExternalLink className="w-4 h-4" />
+          <span>Voir sur Archive.org</span>
+        </ArchiveLink>
+      </div>
+    </div>
+  );
+}
+
+export default async function ArchiveMoviePage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  const movie = await getArchiveMovieDetails(id).catch(() => null);
+  if (!movie) notFound();
+
+  const archiveUrl = "https://archive.org/details/" + movie.id;
 
   return (
-    <div className="min-h-screen bg-cinema-bg pt-20 pb-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-cinema-bg pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-        {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-1 h-8 bg-green-500 rounded-full" />
-            <h1 className="text-3xl font-bold text-white" style={{ fontFamily: "Georgia, serif" }}>
-              Films Gratuits
-            </h1>
+        <Link
+          href="/archive"
+          className="inline-flex items-center gap-2 text-cinema-muted hover:text-white mb-6 group transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+          <span className="text-sm">Films gratuits</span>
+        </Link>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+
+          <div className="lg:col-span-2 space-y-4">
+
+            {movie.sources.length > 0 && (
+              <VideoPlayer
+                sources={movie.sources}
+                poster={movie.poster_url ?? undefined}
+                title={movie.title}
+                className="shadow-2xl shadow-black/60"
+              />
+            )}
+
+            {movie.sources.length === 0 && (
+              <NoVideoFallback archiveUrl={archiveUrl} />
+            )}
+
+            <ArchiveLink
+              href={archiveUrl}
+              className="inline-flex items-center gap-2 text-green-400 text-xs hover:text-green-300 transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              <span>Voir la fiche complete sur Archive.org</span>
+            </ArchiveLink>
+
           </div>
-          <p className="text-cinema-muted text-sm ml-4">
-            Films du domaine public hébergés légalement sur{" "}
-            <a href="https://archive.org" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">
-              Archive.org
-            </a>
-          </p>
+
+          <div className="space-y-5">
+
+            <div>
+              <div className="flex items-center gap-2 mb-2">
+                <Archive className="w-4 h-4 text-green-500" />
+                <span className="text-green-500 text-xs font-semibold uppercase tracking-wider">
+                  Domaine Public Gratuit
+                </span>
+              </div>
+              <h1
+                className="text-2xl font-bold text-white leading-tight"
+                style={{ fontFamily: "Georgia, serif" }}
+              >
+                {movie.title}
+              </h1>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {movie.year && (
+                <div className="bg-cinema-surface border border-cinema-border rounded-lg p-3 text-center">
+                  <Calendar className="w-4 h-4 text-cinema-accent mx-auto mb-1" />
+                  <p className="text-white font-bold text-sm">{movie.year}</p>
+                  <p className="text-cinema-muted text-xs">Annee</p>
+                </div>
+              )}
+              {movie.runtime && (
+                <div className="bg-cinema-surface border border-cinema-border rounded-lg p-3 text-center">
+                  <Clock className="w-4 h-4 text-cinema-accent mx-auto mb-1" />
+                  <p className="text-white font-bold text-sm">{movie.runtime} min</p>
+                  <p className="text-cinema-muted text-xs">Duree</p>
+                </div>
+              )}
+            </div>
+
+            {movie.creator && (
+              <div>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-1 font-semibold">
+                  Realisateur
+                </h3>
+                <p className="text-white text-sm">{movie.creator}</p>
+              </div>
+            )}
+
+            {movie.description && (
+              <div>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
+                  Synopsis
+                </h3>
+                <p className="text-cinema-muted text-sm leading-relaxed line-clamp-6">
+                  {movie.description.replace(/<[^>]+>/g, "")}
+                </p>
+              </div>
+            )}
+
+            {movie.subject.length > 0 && (
+              <div>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
+                  Genres
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {movie.subject.slice(0, 6).map((s) => (
+                    <span
+                      key={s}
+                      className="px-2.5 py-1 bg-cinema-surface border border-cinema-border text-cinema-text text-xs rounded-full"
+                    >
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {movie.sources.length > 0 && (
+              <div>
+                <h3 className="text-cinema-muted text-xs uppercase tracking-widest mb-2 font-semibold">
+                  Qualites disponibles
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {movie.sources.map((s) => (
+                    <span
+                      key={s.src}
+                      className="px-2.5 py-1 bg-green-900/30 border border-green-700/40 text-green-400 text-xs rounded-full"
+                    >
+                      {s.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
         </div>
-
-        {/* Films classiques */}
-        <section className="mb-12">
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-1 h-5 bg-cinema-accent rounded-full" />
-            <h2 className="text-xl font-bold text-white">🎬 Films Classiques</h2>
-            <span className="text-cinema-muted text-sm ml-auto">{featured.total.toLocaleString()} films</span>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-            {featured.movies.map((movie) => (
-              <ArchiveMovieCard key={movie.id} movie={movie} />
-            ))}
-          </div>
-        </section>
-
-        {/* Films muets */}
-        {silent.movies.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-1 h-5 bg-cinema-accent rounded-full" />
-              <h2 className="text-xl font-bold text-white">🎥 Films Muets</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              {silent.movies.map((movie) => (
-                <ArchiveMovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Film Noir */}
-        {noir.movies.length > 0 && (
-          <section className="mb-12">
-            <div className="flex items-center gap-3 mb-5">
-              <div className="w-1 h-5 bg-cinema-accent rounded-full" />
-              <h2 className="text-xl font-bold text-white">🕵️ Film Noir</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-              {noir.movies.map((movie) => (
-                <ArchiveMovieCard key={movie.id} movie={movie} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );
